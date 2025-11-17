@@ -1,14 +1,9 @@
-# backend.py
-# Optimized backend adapted from your Kaggle notebook.
-# - Use: from backend import run_pipeline
-# - Entry: run_pipeline(pdf_path, use_gemini_embeddings=False, use_gemini_generation=False, top_k=6)
-
 import os
 import re
 import tempfile
 from typing import List, Dict, Any, Tuple
-from dotenv import load_dotenv
-load_dotenv()
+# from dotenv import load_dotenv
+# load_dotenv()
 
 # PDF / OCR
 import fitz  # pymupdf
