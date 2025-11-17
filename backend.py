@@ -1,9 +1,8 @@
+import streamlit as st
 import os
 import re
 import tempfile
 from typing import List, Dict, Any, Tuple
-# from dotenv import load_dotenv
-# load_dotenv()
 
 # PDF / OCR
 import fitz  # pymupdf
@@ -139,9 +138,12 @@ def embed_texts_local(texts: List[str], batch_size: int = 32) -> np.ndarray:
 def embed_texts_gemini(texts: List[str]) -> np.ndarray:
     if not GEMINI_CLIENT_AVAILABLE:
         raise RuntimeError("google.generativeai not installed (required for Gemini embeddings)")
-    key = os.getenv("GOOGLE_API_KEY")
+    try:
+        key = st.secrets["google_api_key"]
+    except Exception:
+        key = os.getenv("GOOGLE_API_KEY")
     if not key:
-        raise RuntimeError("Set environment variable GOOGLE_API_KEY to use Gemini embeddings.")
+        raise RuntimeError("Set GOOGLE_API_KEY or Streamlit secret google_api_key.")
     genai.configure(api_key=key)
     vectors = []
     for t in texts:
@@ -215,9 +217,12 @@ def init_gemini_gen_model(model_name: str = None):
         return _gen_model
     if not GEMINI_CLIENT_AVAILABLE:
         return None
-    key = os.getenv("GOOGLE_API_KEY")
+    try:
+        key = st.secrets["google_api_key"]
+    except Exception:
+        key = os.getenv("GOOGLE_API_KEY")  # fallback for local
     if not key:
-        return None
+        raise RuntimeError("No API key found in Streamlit secrets or environment variables.")
     genai.configure(api_key=key)
     model_name = model_name or DEFAULT_GEMINI_GEN_MODEL
     try:
