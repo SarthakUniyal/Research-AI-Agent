@@ -17,7 +17,6 @@ AI-powered Summary • Research Gaps • Slide Generator
 """, unsafe_allow_html=True)
 
 st.write("Upload a research paper (PDF) and let the multi-agent system process it.")
-st.write("Gemini Key Loaded:", bool(os.getenv("GOOGLE_API_KEY")))
 
 uploaded_file = st.file_uploader("📂 Upload PDF File", type=["pdf"])
 
