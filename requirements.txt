@@ -1,0 +1,9 @@
+streamlit
+sentence-transformers==3.0.1
+faiss-cpu
+pymupdf
+pdfplumber
+pytesseract
+pillow
+nltk
+google-generativeai
