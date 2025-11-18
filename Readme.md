@@ -1,4 +1,5 @@
-**📘 Research PDF Intelligence – Multi-Agent System/n**
+**📘 Research PDF Intelligence – Multi-Agent System**
+
 AI-powered Research Paper Understanding, Gap Detection & Slide Generation
 
 **1. Problem Statement**
@@ -76,5 +77,6 @@ A complete architecture diagram has been generated and included in the project f
 **10. License**
 
 This project is distributed under the MIT License allowing academic and personal use.
+
 
 
