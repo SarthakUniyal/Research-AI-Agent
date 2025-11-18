@@ -29,16 +29,12 @@ def sent_tokenize_custom(text):
     # Splits sentences using . ! or ?
     return re.split(r'(?<=[.!?])\s+', text.strip())
 
-# ----------------------------
 # Configuration / defaults
-# ----------------------------
 LOCAL_EMBED_MODEL_NAME = os.getenv("LOCAL_EMBED_MODEL_NAME", "paraphrase-MiniLM-L3-v2")
 GEMINI_EMBED_MODEL = os.getenv("GEMINI_EMBED_MODEL", "models/text-embedding-004")
 DEFAULT_GEMINI_GEN_MODEL = os.getenv("GEMINI_GEN_MODEL", "models/gemini-2.5-flash")
 
-# ----------------------------
 # Utilities: PDF -> pages
-# ----------------------------
 def extract_text_from_pdf(pdf_path: str, ocr_on_empty: bool = True) -> List[Dict]:
     """
     Extract text from a PDF using pdfplumber primarily, fallback to PyMuPDF.
@@ -75,9 +71,7 @@ def extract_text_from_pdf(pdf_path: str, ocr_on_empty: bool = True) -> List[Dict
             pages.append({"page": i + 1, "text": text})
         return pages
 
-# ----------------------------
 # Chunking
-# ----------------------------
 def chunk_text(text: str, max_words: int = 350, overlap_words: int = 50) -> List[str]:
     """
     Split text into sentence-aware overlapping chunks.
@@ -119,9 +113,7 @@ def build_chunks_from_pages(pages: List[Dict], max_words: int = 350, overlap_wor
             all_chunks.append({"page": p["page"], "chunk_id": f"{p['page']}_{i}", "text": c})
     return all_chunks
 
-# ----------------------------
 # Embeddings: local & optional Gemini
-# ----------------------------
 _local_model = None
 
 def init_local_embed_model():
@@ -162,9 +154,7 @@ def embed_texts_gemini(texts: List[str]) -> np.ndarray:
 def get_embed_fn(use_gemini: bool):
     return embed_texts_gemini if use_gemini else embed_texts_local
 
-# ----------------------------
 # FAISS index builder
-# ----------------------------
 def build_faiss_index(embeddings: np.ndarray, normalize: bool = True):
     embeddings = embeddings.astype(np.float32)
     if normalize:
@@ -181,9 +171,7 @@ def index_pipeline(all_chunks: List[Dict], embed_fn) -> Tuple[Any, np.ndarray]:
     index = build_faiss_index(embs, normalize=True)
     return index, embs
 
-# ----------------------------
 # Retriever
-# ----------------------------
 def retrieve_chunks(query: str, index, embed_fn, all_chunks: List[Dict], k: int = 5) -> List[Dict]:
     q_emb = embed_fn([query]).astype(np.float32)
     faiss.normalize_L2(q_emb)
@@ -196,10 +184,8 @@ def retrieve_chunks(query: str, index, embed_fn, all_chunks: List[Dict], k: int 
         item["score"] = float(score)
         results.append(item)
     return results
-
-# ----------------------------
+    
 # RAG Summarizer (Gemini or local fallback)
-# ----------------------------
 def build_rag_prompt(query: str, retrieved_chunks: List[Dict]) -> str:
     prompt = ("You are a Research Analysis Agent. Use ONLY the provided context extracted from a research paper. "
               "Do NOT add outside information.\n\n")
@@ -249,9 +235,7 @@ def rag_answer(query: str, index, embed_fn, all_chunks: List[Dict], k: int = 6, 
         answer = ". ".join(sentences[:6]) + ('.' if sentences else '')
     return {"query": query, "answer": answer, "context": retrieved}
 
-# ----------------------------
 # Gap Finder Agent
-# ----------------------------
 def build_gap_prompt(retrieved_chunks: List[Dict]) -> str:
     prompt = ("You are a Research Gap Analysis Agent.\nYour task is to read ONLY the provided context from the paper and:\n"
               "- Identify missing experiments\n- Highlight unclear assumptions\n- Detect limitations\n- Find potential improvements\n- Suggest future research directions\nDo NOT add information not present in the text.\n\n")
@@ -283,9 +267,7 @@ def gap_finder(index, embed_fn, all_chunks, k=6, use_gemini_generation: bool = T
             answer = "No clear issues found."
     return {"analysis": answer, "context": retrieved}
 
-# ----------------------------
 # Slide generator
-# ----------------------------
 def build_slide_prompt(summary_text: str, gap_text: str) -> str:
     prompt = f"""
 You are a PPT Slide Generator Agent.
